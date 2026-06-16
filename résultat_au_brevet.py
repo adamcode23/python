@@ -1,0 +1,1 @@
+print(input("quel est t'as note au brevet ? "))
