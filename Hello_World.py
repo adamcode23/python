@@ -1,4 +1,2 @@
-slt = "Hello, World!"
-mon_caca_qui_pue_des_fesses = 67
-
-print(str(mon_caca_qui_pue_des_fesses) + slt)
+age = int(input("ta quel age bg, abonne toi stp je suis en dépréssion dépresive ;( "))
+print(age+1)
