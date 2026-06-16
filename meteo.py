@@ -1,3 +1,5 @@
+
+print("Bienvenue dans le programme météo !")
 celciucs = float(input("quel est la température en celciucs ? "))
 if celciucs > 25:
     print("waa i fait super chau")
