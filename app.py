@@ -14,19 +14,12 @@ while True:
 
     break
 
-
-
-
-
-if len(str(mot_de_passe)) < 4:
-    if len(str(mot_de_passe)) == 0:
-        print("écris autre chose")
-    else:
-        print("mot de passe trop court !")
-elif mot_de_passe == 1234:
-    print("mot de passe correct !")
-    print("mais il n'ai pas très sécurisé, je te conseille de le changer !")
+if len(str(int(mot_de_passe))) < 4:
+    print("Mot de passe trop court !")
+elif int(mot_de_passe) == 1234:
+    print("Mot de passe correct !")
+    print("Mais il n'est pas très sécurisé, je te conseille de le changer !")
 else:
-    print("mot de passe incorrect !")
+    print("Mot de passe incorrect !")
 
 print("Le programme est terminé !")
