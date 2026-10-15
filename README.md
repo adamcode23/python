@@ -8,7 +8,7 @@ Le jeu graphique se lance avec Pygame dans le bureau distant. Démarre d'abord c
 ./start-gui.sh
 ```
 
-Ouvre ensuite le port **6080** dans l'onglet **Ports** de VS Code, puis lance le jeu dans un autre terminal :
+Le port **6080** ouvre le bureau distant dans noVNC ; il ne lance pas le jeu à lui seul. Ouvre ce port dans l'onglet **Ports** de VS Code, puis lance le jeu dans un autre terminal :
 
 ```bash
 python -m pip install -r requirements.txt

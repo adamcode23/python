@@ -20,8 +20,17 @@ fi
 
 echo "=== Lancement du serveur VNC ==="
 if ! (echo > /dev/tcp/127.0.0.1/5900) >/dev/null 2>&1; then
-    nohup x11vnc -display :1 -nopw -listen localhost -xkb >/tmp/x11vnc.log 2>&1 </dev/null &
-    sleep 2
+    nohup x11vnc -display :1 -nopw -forever -shared -listen localhost -xkb >/tmp/x11vnc.log 2>&1 </dev/null &
+fi
+for attempt in {1..10}; do
+    if (echo > /dev/tcp/127.0.0.1/5900) >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+if ! (echo > /dev/tcp/127.0.0.1/5900) >/dev/null 2>&1; then
+    echo "Erreur : x11vnc n'écoute pas sur le port 5900. Consulte /tmp/x11vnc.log." >&2
+    exit 1
 fi
 
 echo "=== Lancement de noVNC (Port 6080) ==="
