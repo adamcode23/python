@@ -1,26 +1,42 @@
 #!/bin/bash
+set -euo pipefail
+
 echo "=== Installation des dépendances graphiques ==="
 sudo apt-get update
-sudo apt-get install -y xvfb fluxbox x11vnc novnc python3-pip
+sudo apt-get install -y xvfb fluxbox x11vnc novnc
 
 echo "=== Configuration de l'affichage virtuel ==="
 export DISPLAY=:1
-Xvfb :1 -screen 0 1024x768x16 &
-sleep 2
+if ! pgrep -f '^Xvfb :1 ' >/dev/null; then
+    nohup Xvfb :1 -screen 0 1024x768x16 >/tmp/xvfb.log 2>&1 </dev/null &
+    sleep 2
+fi
 
 echo "=== Lancement du gestionnaire de fenêtres (Fluxbox) ==="
-fluxbox &
-sleep 2
+if ! pgrep -x fluxbox >/dev/null; then
+    nohup fluxbox >/tmp/fluxbox.log 2>&1 </dev/null &
+    sleep 2
+fi
 
 echo "=== Lancement du serveur VNC ==="
-x11vnc -display :1 -nopw -listen localhost -xkb &
-sleep 2
+if ! (echo > /dev/tcp/127.0.0.1/5900) >/dev/null 2>&1; then
+    nohup x11vnc -display :1 -nopw -listen localhost -xkb >/tmp/x11vnc.log 2>&1 </dev/null &
+    sleep 2
+fi
 
 echo "=== Lancement de noVNC (Port 6080) ==="
-/usr/share/novnc/utils/launch.sh --vnc localhost:5900 --listen 6080 &
-sleep 2
+if ! (echo > /dev/tcp/127.0.0.1/6080) >/dev/null 2>&1; then
+    nohup /usr/share/novnc/utils/novnc_proxy --web /usr/share/novnc --vnc localhost:5900 --listen 6080 >/tmp/novnc.log 2>&1 </dev/null &
+fi
+for attempt in {1..10}; do
+    if (echo > /dev/tcp/127.0.0.1/6080) >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+if ! (echo > /dev/tcp/127.0.0.1/6080) >/dev/null 2>&1; then
+    echo "Erreur : noVNC n'écoute pas sur le port 6080." >&2
+    exit 1
+fi
 
-echo "=== Installation de Pygame ==="
-pip3 install pygame
-
-echo "=== TOUT EST PRÊT ! ==="
+echo "=== Bureau prêt sur le port 6080. Installe Pygame avec requirements.txt. ==="
