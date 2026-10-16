@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "=== Installation des dépendances graphiques ==="
 if ! command -v Xvfb >/dev/null ||
    ! command -v fluxbox >/dev/null ||
@@ -64,5 +66,16 @@ if ! (echo > /dev/tcp/127.0.0.1/6080) >/dev/null 2>&1; then
     exit 1
 fi
 
+echo "=== Lancement du jeu du pendu ==="
+if ! pgrep -u "$(id -u)" -f '[p]ython.*pendu[.]py' >/dev/null; then
+    nohup env DISPLAY=:1 python "$SCRIPT_DIR/pendu.py" >/tmp/pendu.log 2>&1 </dev/null &
+    game_pid=$!
+    sleep 1
+    if ! kill -0 "$game_pid" 2>/dev/null; then
+        echo "Erreur : le jeu du pendu n'a pas démarré. Consulte /tmp/pendu.log." >&2
+        exit 1
+    fi
+fi
+
 echo "=== Bureau prêt : ouvre le port 6080 dans VS Code, puis visite /vnc.html. ==="
-echo "Pour lancer le jeu, utilise un autre terminal : DISPLAY=:1 python pendu.py"
+echo "Le jeu du pendu démarre automatiquement dans le bureau distant."
