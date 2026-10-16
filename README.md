@@ -2,13 +2,13 @@
 
 ## Jeu du pendu
 
-Le jeu graphique se lance avec Pygame dans le bureau distant. Démarre d'abord ce bureau :
+Le bureau distant noVNC démarre automatiquement au démarrage du Codespace et son port **6080** s'ouvre dans le navigateur. Après avoir ajouté la configuration `.devcontainer`, reconstruis le Codespace une fois pour l'activer. Pour démarrer le bureau manuellement :
 
 ```bash
 ./start-gui.sh
 ```
 
-Le port **6080** ouvre le bureau distant dans noVNC ; il ne lance pas le jeu à lui seul. Ouvre ce port dans l'onglet **Ports** de VS Code, puis lance le jeu dans un autre terminal :
+Le port **6080** ouvre le bureau distant dans noVNC ; il ne lance pas le jeu à lui seul. Dans l'onglet **Ports** de VS Code, ouvre le port **6080** dans un navigateur et ajoute `/vnc.html` à l'adresse si nécessaire. Ensuite, lance le jeu dans un autre terminal :
 
 ```bash
 python -m pip install -r requirements.txt

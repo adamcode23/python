@@ -2,14 +2,29 @@
 set -euo pipefail
 
 echo "=== Installation des dépendances graphiques ==="
-sudo apt-get update
-sudo apt-get install -y xvfb fluxbox x11vnc novnc
+if ! command -v Xvfb >/dev/null ||
+   ! command -v fluxbox >/dev/null ||
+   ! command -v x11vnc >/dev/null ||
+   [ ! -x /usr/share/novnc/utils/novnc_proxy ] ||
+   ! command -v websockify >/dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y xvfb fluxbox x11vnc novnc
+fi
 
 echo "=== Configuration de l'affichage virtuel ==="
 export DISPLAY=:1
 if ! pgrep -f '^Xvfb :1 ' >/dev/null; then
     nohup Xvfb :1 -screen 0 1024x768x16 >/tmp/xvfb.log 2>&1 </dev/null &
-    sleep 2
+    for attempt in {1..10}; do
+        if pgrep -f '^Xvfb :1 ' >/dev/null; then
+            break
+        fi
+        sleep 1
+    done
+fi
+if ! pgrep -f '^Xvfb :1 ' >/dev/null; then
+    echo "Erreur : Xvfb n'a pas démarré. Consulte /tmp/xvfb.log." >&2
+    exit 1
 fi
 
 echo "=== Lancement du gestionnaire de fenêtres (Fluxbox) ==="
@@ -45,7 +60,9 @@ for attempt in {1..10}; do
 done
 if ! (echo > /dev/tcp/127.0.0.1/6080) >/dev/null 2>&1; then
     echo "Erreur : noVNC n'écoute pas sur le port 6080." >&2
+    echo "Consulte /tmp/novnc.log pour le détail." >&2
     exit 1
 fi
 
-echo "=== Bureau prêt sur le port 6080. Installe Pygame avec requirements.txt. ==="
+echo "=== Bureau prêt : ouvre le port 6080 dans VS Code, puis visite /vnc.html. ==="
+echo "Pour lancer le jeu, utilise un autre terminal : DISPLAY=:1 python pendu.py"
