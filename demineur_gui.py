@@ -15,7 +15,7 @@ class DemineurGUI:
         self.root = root
         self.root.title("Démineur")
         self.root.configure(bg="#eef2ff")
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)
 
         self.top = tk.Frame(root, bg="#eef2ff")
         self.top.pack(pady=(10, 5))
@@ -66,8 +66,51 @@ class DemineurGUI:
         )
         self.status.pack()
 
-        self.frame = tk.Frame(root, bg="#eef2ff")
-        self.frame.pack(pady=5)
+        self.new_game_button = tk.Button(
+            self.top,
+            text="Nouvelle partie",
+            font=("Segoe UI", 9),
+            command=self.setup_game
+        )
+        self.new_game_button.pack(pady=(0, 5))
+
+        self.board_view = tk.Frame(root, bg="#eef2ff")
+        self.board_view.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.board_view.grid_rowconfigure(0, weight=1)
+        self.board_view.grid_columnconfigure(0, weight=1)
+        self.canvas = tk.Canvas(
+            self.board_view,
+            bg="#eef2ff",
+            highlightthickness=0
+        )
+        self.horizontal_scrollbar = tk.Scrollbar(
+            self.board_view,
+            orient=tk.HORIZONTAL,
+            command=self.canvas.xview
+        )
+        self.vertical_scrollbar = tk.Scrollbar(
+            self.board_view,
+            orient=tk.VERTICAL,
+            command=self.canvas.yview
+        )
+        self.canvas.configure(
+            xscrollcommand=self.horizontal_scrollbar.set,
+            yscrollcommand=self.vertical_scrollbar.set
+        )
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.vertical_scrollbar.grid(row=0, column=1, sticky="ns")
+        self.horizontal_scrollbar.grid(row=1, column=0, sticky="ew")
+
+        self.frame = tk.Frame(self.canvas, bg="#eef2ff")
+        self.canvas_window = self.canvas.create_window(
+            (0, 0), window=self.frame, anchor="nw"
+        )
+        self.frame.bind(
+            "<Configure>",
+            lambda _event: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
 
         self.setup_game()
 
@@ -77,6 +120,7 @@ class DemineurGUI:
         self.revealed = [[False for _ in range(self.cols)] for _ in range(self.rows)]
         self.flags = [[False for _ in range(self.cols)] for _ in range(self.rows)]
         self.buttons = [[None for _ in range(self.cols)] for _ in range(self.rows)]
+        self.game_over = False
 
         for widget in self.frame.winfo_children():
             widget.destroy()
@@ -102,7 +146,21 @@ class DemineurGUI:
             text=f"Niveau : {self.difficulty_var.get()}   Mines : {self.bombs}"
         )
         self.root.update_idletasks()
-        self.root.geometry(f"{self.cols * 28 + 40}x{self.rows * 28 + 180}")
+        board_width = self.frame.winfo_reqwidth()
+        board_height = self.frame.winfo_reqheight()
+        available_width = max(1, self.root.winfo_screenwidth() - 50)
+        available_height = max(
+            1,
+            self.root.winfo_screenheight() - self.top.winfo_reqheight() - 80
+        )
+        viewport_width = min(board_width, available_width)
+        viewport_height = min(board_height, available_height)
+        self.canvas.config(width=viewport_width, height=viewport_height)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.root.geometry(
+            f"{viewport_width + 40}x"
+            f"{viewport_height + self.top.winfo_reqheight() + 50}"
+        )
 
     def init_board(self, rows, cols, bombs):
         board = [[0 for _ in range(cols)] for _ in range(rows)]
@@ -126,21 +184,33 @@ class DemineurGUI:
         return board
 
     def on_left_click(self, r, c):
+        if self.game_over:
+            return
         if self.flags[r][c] or self.revealed[r][c]:
             return
 
         if self.reveal(r, c):
             self.show_all_bombs()
-            messagebox.showinfo("Perdu", "💥 Vous avez touché une mine !")
+            self.game_over = True
+            messagebox.showinfo(
+                "Perdu",
+                "💥 Vous avez touché une mine !",
+                parent=self.root
+            )
             self.setup_game()
             return
 
         if self.is_winner():
-            messagebox.showinfo("Gagné", "🎉 Bravo, vous avez gagné !")
-            self.setup_game()
+            self.game_over = True
+            self.status.config(text="🎉 Gagné ! Bravo, vous avez gagné !")
+            messagebox.showinfo(
+                "Gagné",
+                "🎉 Bravo, vous avez gagné !",
+                parent=self.root
+            )
 
     def on_right_click(self, r, c):
-        if self.revealed[r][c]:
+        if self.game_over or self.revealed[r][c]:
             return
         self.flags[r][c] = not self.flags[r][c]
         self.buttons[r][c].config(
