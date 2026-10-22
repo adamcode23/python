@@ -1,10 +1,5 @@
-a = 0
-def fonction1():
-    print("fontion1 a =", a)
+def simple_range(n):
+    return list(range(n))
 
 
-def fonction2():
-    print("fontion2 a =", a)
-
-fonction1()
-fonction2()
+simple_range(10)
