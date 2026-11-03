@@ -9,7 +9,6 @@ while True:
         print("Le mot de passe doit être compris entre 0 et 20 .")
         continue  
 
-        
 
 
     break
