@@ -7,7 +7,7 @@ import pygame
 WIDTH = 900
 HEIGHT = 650
 FPS = 60
-MAX_ERRORS = 7
+MAX_ERRORS = 10
 
 WORDS = (
     "PYTHON",
