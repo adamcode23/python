@@ -20,6 +20,7 @@ WORDS = (
     "RENARD",
     "PAPILLON",
     "MONTAGNE",
+    "SPORT",
 )
 
 BACKGROUND = (15, 23, 42)

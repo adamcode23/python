@@ -10,7 +10,6 @@ while True:
         continue  
 
 
-
     break
 
 if len(str(int(mot_de_passe))) < 4:
