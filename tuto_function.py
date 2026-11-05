@@ -1,5 +1,12 @@
 def simple_range(n):
-    return list(range(n))
+    l = []
+    i = 0
+
+    while i < n:
+        l.append(i)
+        i+=1
 
 
-simple_range(10)
+    return l 
+
+print(simple_range(5))
